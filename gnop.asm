@@ -22,7 +22,7 @@ paddle1Score .rs 1
 paddle2Score .rs 1
 paddleTurn .rs 1      ; $01 is paddle1, $02 is paddle2
 turnPause .rs 1
-  
+
 ; CONSTANTS
 PPU_STAT = $2002
 PPU_ADDR = $2006
@@ -118,7 +118,7 @@ clrmem:
   JSR loadPalettes
   JSR loadSprites
   JSR initializeVariables
-  
+
 Forever:
   JMP Forever     ;jump back to Forever, infinite loop
 
@@ -128,9 +128,9 @@ NMI:
   JSR movePaddles
   JSR moveBall
   JSR updateSprites
-  
+
   RTI             ; return from interrupt
- 
+
 ;;;;;;;;;;;;;;
 
 vblankWait:
@@ -138,7 +138,7 @@ vblankWait:
   BPL vblankWait
   RTS
 
-startNMI: 
+startNMI:
   LDA #$00
   STA $2003       ; set the low byte (00) of the RAM address
   LDA #$02
@@ -150,7 +150,7 @@ initializeVariables:
   ORA #MOVING_RIGHT
   STA ballAngle     ; ballAngle = MOVING_DOWN | MOVING_LEFT;
   LDA #$01
-  STA paddleSpeed 
+  STA paddleSpeed
   LDA #BALL_DEFAULT_SPEED_X
   STA ballSpeedX
   LDA #BALL_DEFAULT_SPEED_Y
@@ -208,7 +208,7 @@ readCtrl:
     DEX
     BNE readCtrlTwo_Loop
   RTS
-  
+
 resetBall:
   LDA #$00
   STA ballSpeedX
@@ -222,7 +222,7 @@ resetBall:
   STA BALL_XPOS
   STA BALL_YPOS
   RTS
- 
+
 movePaddles:
 ; reset paddle movement variables
   LDA #00;
@@ -231,63 +231,63 @@ movePaddles:
 ; PADDLE 1 - react to button events
   if_CtrlOneUp:
     LDA ctrlOne
-    AND #BUTTON_UP              
+    AND #BUTTON_UP
     BEQ endif_CtrlOneUp         ; if( ctrlOne & BUTTON_UP ) {
-    LDA #MOVING_UP              ; 
+    LDA #MOVING_UP              ;
     STA paddle1Movement         ;   paddle1Movement = MOVING_UP;
     LDA PADDLE1_YPOS
     SEC
     SBC paddleSpeed
     STA PADDLE1_YPOS            ;   *PADDLE1_YPOS -= paddleSpeed;
-    CMP #PADDLE_Y_TOP_LIMIT     ;   
+    CMP #PADDLE_Y_TOP_LIMIT     ;
     BCS endif_CtrlOneUp         ;   if( *PADDLE1_YPOS < TOP_LIMIT  ) {
     LDA #PADDLE_Y_TOP_LIMIT     ;     *PADDLE1_YPOS = TOP_LIMIT;
     STA PADDLE1_YPOS            ;   }
   endif_CtrlOneUp:              ; }
   if_CtrlOneDown:
     LDA ctrlOne
-    AND #BUTTON_DOWN            ; 
+    AND #BUTTON_DOWN            ;
     BEQ endif_CtrlOneDown       ; if( ctrlOne & BUTTON_DOWN ) {
-    LDA #MOVING_DOWN            ; 
+    LDA #MOVING_DOWN            ;
     STA paddle1Movement         ;   paddle1Movement = MOVING_DOWN;
     LDA PADDLE1_YPOS
     CLC
     ADC paddleSpeed
     STA PADDLE1_YPOS            ;   *PADDLE1_YPOS += paddleSpeed;
     LDA #PADDLE_Y_BOTTOM_LIMIT
-    CMP PADDLE1_YPOS            ;   
+    CMP PADDLE1_YPOS            ;
     BCS endif_CtrlOneDown       ;   if( BOTTOM_LIMIT < *PADDLE1_YPOS ) {
     STA PADDLE1_YPOS            ;     *PADDLE1_YPOS = BOTTOM_LIMIT;
   endif_CtrlOneDown:            ;   }
                                 ; }
-; PADDLE 2 - react to button events  
+; PADDLE 2 - react to button events
   if_CtrlTwoUp:
     LDA ctrlTwo
-    AND #BUTTON_UP              
+    AND #BUTTON_UP
     BEQ endif_CtrlTwoUp         ; if( ctrlTwo & BUTTON_UP ) {
-    LDA #MOVING_UP              ; 
+    LDA #MOVING_UP              ;
     STA paddle2Movement         ;   paddle2Movement = MOVING_UP;
     LDA PADDLE2_YPOS
     SEC
     SBC paddleSpeed
     STA PADDLE2_YPOS            ;   *PADDLE2_YPOS -= paddleSpeed;
-    CMP #PADDLE_Y_TOP_LIMIT     ;   
+    CMP #PADDLE_Y_TOP_LIMIT     ;
     BCS endif_CtrlTwoUp         ;   if( *PADDLE2_YPOS < TOP_LIMIT  ) {
     LDA #PADDLE_Y_TOP_LIMIT     ;     *PADDLE2_YPOS = TOP_LIMIT;
     STA PADDLE2_YPOS            ;   }
   endif_CtrlTwoUp:              ; }
   if_CtrlTwoDown:
     LDA ctrlTwo
-    AND #BUTTON_DOWN            ; 
+    AND #BUTTON_DOWN            ;
     BEQ endif_CtrlTwoDown       ; if( ctrlTwo & BUTTON_DOWN ) {
-    LDA #MOVING_DOWN            ; 
+    LDA #MOVING_DOWN            ;
     STA paddle2Movement         ;   paddle2Movement = MOVING_DOWN;
     LDA PADDLE2_YPOS
     CLC
     ADC paddleSpeed
     STA PADDLE2_YPOS            ;   *PADDLE2_YPOS += paddleSpeed;
     LDA #PADDLE_Y_BOTTOM_LIMIT
-    CMP PADDLE2_YPOS            ;   
+    CMP PADDLE2_YPOS            ;
     BCS endif_CtrlTwoDown       ;   if( BOTTOM_LIMIT < *PADDLE2_YPOS ) {
     STA PADDLE2_YPOS            ;     *PADDLE2_YPOS = BOTTOM_LIMIT;
   endif_CtrlTwoDown:            ;   }
@@ -362,7 +362,7 @@ moveBall:
     LDA #$01
     STA ballSpeedY
   endif_ballLeft:
-  
+
   LDA ballAngle
   AND #MOVING_RIGHT
   BEQ endif_ballRight
@@ -406,7 +406,7 @@ moveBall:
     LDA #$01
     STA ballSpeedY
   endif_ballRight:
-  
+
   LDA ballAngle
   AND #MOVING_UP
   BEQ endif_ballUp
@@ -440,7 +440,7 @@ moveBall:
       STA ballAngle
     endif_bounceDown:
   endif_ballUp:
-  
+
   LDA ballAngle
   AND #MOVING_DOWN
   BEQ endif_ballDown
@@ -499,7 +499,7 @@ updateSprites:
   CLC
   ADC #$08
   STA PADDLE2_YPOS + 12
-  
+
   ;update paddle variables
   LDA PADDLE1_YPOS
   SEC
@@ -515,9 +515,9 @@ updateSprites:
   CLC
   ADC #$28
   STA paddle2Bottom
-  
+
   RTS
-  
+
   .bank 1
   .org $E000
 
@@ -545,16 +545,17 @@ sprites:
   .db $80, $75, $00, $80
 
   .org $FFFA     ;first of the three vectors starts here
-  .dw NMI        ;when an NMI happens (once per frame if enabled) the 
+  .dw NMI        ;when an NMI happens (once per frame if enabled) the
                    ;processor will jump to the label NMI:
   .dw RESET      ;when the processor first turns on or is reset, it will jump
                    ;to the label RESET:
-  .dw 0          ;external interrupt IRQ is not used in this tutorial
-  
-  
-;;;;;;;;;;;;;;  
-  
-  
+  .dw 0          ;external interrupt IRQ (not currently used).
+
+
+;;;;;;;;;;;;;;
+
+
   .bank 2
   .org $0000
   .incbin "mario.chr"   ;includes 8KB graphics file from SMB1
+
