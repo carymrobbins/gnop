@@ -1,27 +1,32 @@
-  .inesprg 1   ; 1x 16KB PRG code
-  .ineschr 1   ; 1x  8KB CHR data
-  .inesmap 0   ; mapper 0 = NROM, no bank swapping
-  .inesmir 1   ; background mirroring
+.segment "HEADER"
 
-; VARIABLES
-  .rsset $0000  ; start from location 0
+    .byte   "NES", $1A      ; iNES header identifier
+    .byte   2               ; 2x 16KB PRG code
+    .byte   1               ; 1x 8KB CHR data
+    .byte   $01, $00        ; mapper 0, vertical mirroring
 
-ctrlOne .rs 1
-ctrlTwo .rs 1
-ballAngle .rs 1       ; bits : nul nul nul nul up down left right
-paddle1Top .rs 1
-paddle1Bottom .rs 1
-paddle2Top .rs 1
-paddle2Bottom .rs 1
-paddle1Movement .rs 1
-paddle2Movement .rs 1
-paddleSpeed .rs 1
-ballSpeedX .rs 1
-ballSpeedY .rs 1
-paddle1Score .rs 1
-paddle2Score .rs 1
-paddleTurn .rs 1      ; $01 is paddle1, $02 is paddle2
-turnPause .rs 1
+.segment "STARTUP"
+
+.segment "ZEROPAGE"
+
+ctrlOne: .res 1
+ctrlTwo: .res 1
+ballAngle: .res 1       ; bits : nul nul nul nul up down left right
+paddle1Top: .res 1
+paddle1Bottom: .res 1
+paddle2Top: .res 1
+paddle2Bottom: .res 1
+paddle1Movement: .res 1
+paddle2Movement: .res 1
+paddleSpeed: .res 1
+ballSpeedX: .res 1
+ballSpeedY: .res 1
+paddle1Score: .res 1
+paddle2Score: .res 1
+paddleTurn: .res 1      ; $01 is paddle1, $02 is paddle2
+turnPause: .res 1
+
+.segment "CODE"
 
 ; CONSTANTS
 PPU_STAT = $2002
@@ -82,9 +87,6 @@ BALL_DEFAULT_SPEED_X = $02
 BALL_DEFAULT_SPEED_Y = $01
 
 ;;;;;;;;;;;;;;;
-
-  .bank 0
-  .org $C000
 
 RESET:
   SEI          ; disable IRQs
@@ -518,44 +520,38 @@ updateSprites:
 
   RTS
 
-  .bank 1
-  .org $E000
-
 palette:
 ;background
-  .db $0F,$31,$32,$33,$34,$35,$36,$37,$38,$39,$3A,$3B,$3C,$3D,$3E,$0F
+  .byte $0F,$31,$32,$33,$34,$35,$36,$37,$38,$39,$3A,$3B,$3C,$3D,$3E,$0F
 ;sprites
-  .db $0F,$08,$28,$18,$31,$02,$38,$3C,$0F,$1C,$15,$14,$31,$02,$38,$3C
+  .byte $0F,$08,$28,$18,$31,$02,$38,$3C,$0F,$1C,$15,$14,$31,$02,$38,$3C
 
 sprites:
   ; PADDLE 1
      ;vert tile attr horiz
-  .db $80, $85, $00, $08
-  .db $88, $86, $00, $08
-  .db $90, $86, $00, $08
-  .db $98, $86, $00, $08
+  .byte $80, $85, $00, $08
+  .byte $88, $86, $00, $08
+  .byte $90, $86, $00, $08
+  .byte $98, $86, $00, $08
   ; PADDLE 2
      ;vert tile attr horiz
-  .db $80, $85, $00, $F0
-  .db $88, $86, $00, $F0
-  .db $90, $86, $00, $F0
-  .db $98, $86, $00, $F0
+  .byte $80, $85, $00, $F0
+  .byte $88, $86, $00, $F0
+  .byte $90, $86, $00, $F0
+  .byte $98, $86, $00, $F0
   ; BALL
      ;vert tile attr horiz
-  .db $80, $75, $00, $80
+  .byte $80, $75, $00, $80
 
-  .org $FFFA     ;first of the three vectors starts here
-  .dw NMI        ;when an NMI happens (once per frame if enabled) the
+.segment "VECTORS"
+
+  .word 0, 0, 0    ;Unused, but needed to advance PC to $fffa.
+  .word NMI        ;when an NMI happens (once per frame if enabled) the
                    ;processor will jump to the label NMI:
-  .dw RESET      ;when the processor first turns on or is reset, it will jump
+  .word RESET      ;when the processor first turns on or is reset, it will jump
                    ;to the label RESET:
-  .dw 0          ;external interrupt IRQ (not currently used).
+  .word 0          ;external interrupt IRQ (not currently used).
 
+.segment "CHARS"
 
-;;;;;;;;;;;;;;
-
-
-  .bank 2
-  .org $0000
   .incbin "mario.chr"   ;includes 8KB graphics file from SMB1
-
